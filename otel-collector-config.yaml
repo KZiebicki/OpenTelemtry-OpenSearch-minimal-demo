@@ -2,22 +2,31 @@ receivers:
   otlp:
     protocols:
       grpc:
-
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
 processors:
   batch:
 
 exporters:
-  elasticsearch:
-    endpoints: ["http://localhost:9200"]
-    index: "otel-%{+yyyy.MM.dd}"
+  opensearch/trace:
+    http:
+      endpoint: http://opensearch:9200
+      tls:
+        insecure: true
+  opensearch/log:
+    http:
+      endpoint: http://opensearch:9200
+      tls:
+        insecure: true
 
 service:
   pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [elasticsearch]
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [elasticsearch]
+      exporters: [opensearch/log]
+    traces:
+      receivers: [otlp]
+      exporters: [opensearch/trace]
+      processors: [batch]
