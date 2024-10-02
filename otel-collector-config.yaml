@@ -4,7 +4,10 @@ receivers:
       grpc:
         endpoint: 0.0.0.0:4317
       http:
-        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - "http://*"
+            - "https://*"
 processors:
   batch:
 
@@ -19,6 +22,10 @@ exporters:
       endpoint: http://opensearch:9200
       tls:
         insecure: true
+  otlp/data-prepper:
+    endpoint: data-prepper:21891
+    tls:
+      insecure: true
 
 service:
   pipelines:
@@ -28,5 +35,5 @@ service:
       exporters: [opensearch/log]
     traces:
       receivers: [otlp]
-      exporters: [opensearch/trace]
+      exporters: [opensearch/trace, otlp/data-prepper]
       processors: [batch]
