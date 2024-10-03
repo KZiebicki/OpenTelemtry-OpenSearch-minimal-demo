@@ -31,22 +31,34 @@ namespace WebApplication1
             });
             builder.Services.AddOpenTelemetry()
                   .ConfigureResource(resource => resource.AddService(serviceName))
-                  .WithTracing(tracing => tracing
-                      .AddAspNetCoreInstrumentation()
+                  .WithTracing(x =>
+                  {
+                      if (builder.Environment.IsDevelopment())
+                          x.SetSampler<AlwaysOnSampler>();
+                      x.AddAspNetCoreInstrumentation()
+                      //.AddGrpcClientInstrumentation()
+                      .AddHttpClientInstrumentation()
                       .AddOtlpExporter(otlpOptions =>
                       {
                           otlpOptions.Endpoint = new Uri("http://localhost:4317");
                           otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
                       })
-                      .AddConsoleExporter())
-                  .WithMetrics(metrics => metrics
-                      .AddAspNetCoreInstrumentation()
-                    .AddOtlpExporter(otlpOptions =>
-                    {
-                        otlpOptions.Endpoint = new Uri("http://localhost:4317");
-                        otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
-                    })
-                      .AddConsoleExporter());
+                      .AddConsoleExporter();
+                  })
+                      .WithMetrics(x =>
+                      {
+                          x.AddRuntimeInstrumentation()
+                              .AddMeter(
+                              "Microsoft.AspNetCore.Hosting",
+                              "Microsoft.AspNetCore.Server.Kestrel",
+                              "System.Net.Http")
+                          .AddOtlpExporter(otlpOptions =>
+                          {
+                              otlpOptions.Endpoint = new Uri("http://localhost:4317");
+                              otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                          })
+                        .AddConsoleExporter();
+                      });
 
             var app = builder.Build();
 
