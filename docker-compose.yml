@@ -54,6 +54,8 @@ services:
       - "4318"
     networks:
       - opensearch-net
+    depends_on:
+      - data-prepper
   data-prepper:
     image: opensearchproject/data-prepper:2
     container_name: data-prepper
@@ -61,12 +63,11 @@ services:
       - ./pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
       - ./data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
     ports:
-      - 2021:2021
-      - "21892"
-    expose:
-      - "2021"
+      - "21890:21890"
     networks:
-    - opensearch-net
+      - opensearch-net
+    depends_on:
+      - opensearch
 
 volumes:
   opensearch-data:

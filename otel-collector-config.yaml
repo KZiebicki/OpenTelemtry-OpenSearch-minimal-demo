@@ -23,9 +23,10 @@ exporters:
       tls:
         insecure: true
   otlp/data-prepper:
-    endpoint: data-prepper:21891
+    endpoint: data-prepper:21890
     tls:
       insecure: true
+      insecure_skip_verify: true
 
 service:
   pipelines:
