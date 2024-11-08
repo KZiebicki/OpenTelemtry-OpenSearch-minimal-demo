@@ -43,6 +43,7 @@ namespace WebApplication1
                           otlpOptions.Endpoint = new Uri("http://localhost:4317");
                           otlpOptions.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
                       })
+                      .AddJaegerExporter()
                       .AddConsoleExporter();
                   })
                       .WithMetrics(x =>
